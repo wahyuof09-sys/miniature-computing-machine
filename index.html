@@ -1,0 +1,3043 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAHYU SHOP - Topup & PPOB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==================== RESET & BASE STYLES ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #000;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ==================== LOADING ==================== */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ==================== LOGIN MODAL ==================== */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid #000;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            color: #000;
+        }
+
+        .login-logo i {
+            font-size: 36px;
+        }
+
+        .login-logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .login-logo span {
+            color: #333;
+        }
+
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #000;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-btn:hover {
+            background: #222;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-error {
+            color: #ff4444;
+            margin-top: 12px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .login-note {
+            margin-top: 25px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .login-note i {
+            color: #000;
+            margin-right: 5px;
+        }
+
+        /* ==================== NAVBAR ==================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 18px 25px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            color: #000;
+            font-size: 26px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            color: #000;
+            font-weight: 800;
+        }
+
+        .logo span {
+            color: #333;
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 15px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #000;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #000;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* ==================== MOBILE MENU ==================== */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 25px;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+            border-left: 1px solid #ddd;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mobile-header h2 {
+            color: #000;
+            font-weight: 800;
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* User Profile in Mobile Menu */
+        .user-profile-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-profile-section:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 800;
+            color: #000;
+            font-size: 17px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-email {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .developer-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .profile-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .profile-hint i {
+            margin-right: 5px;
+        }
+
+        .mobile-links {
+            list-style: none;
+        }
+
+        .mobile-links li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-links a {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 18px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .mobile-links a:hover {
+            background: rgba(0, 0, 0, 0.05);
+            transform: translateX(5px);
+        }
+
+        .mobile-links .developer-item {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            font-weight: 700;
+        }
+
+        .mobile-links .developer-item:hover {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            transform: translateX(5px);
+        }
+
+        .mobile-links .social-link-item {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+        }
+
+        .mobile-links .social-link-item:hover {
+            background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+            transform: translateX(5px);
+        }
+
+        .mobile-links .logout-btn {
+            color: #ff4444;
+            border: 1px solid #ff4444;
+            background: rgba(255, 68, 68, 0.05);
+            margin-top: 15px;
+            font-weight: 700;
+        }
+
+        .mobile-links .logout-btn:hover {
+            background: rgba(255, 68, 68, 0.15);
+            transform: translateX(5px);
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+            margin: 20px 0;
+        }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .main-content {
+            display: none;
+            padding-top: 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 25px 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: #000;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        .profile {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin: 40px auto;
+            border: 4px solid #000;
+            padding: 6px;
+            background: #fff;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+        }
+
+        .profile:hover {
+            transform: scale(1.03);
+        }
+
+        .profile img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* ==================== ANNOUNCEMENT BOX ==================== */
+        .announcement-box {
+            background: linear-gradient(135deg, #000000 0%, #222222 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            position: relative;
+            border: 3px solid #ffd700;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+        }
+
+        .announcement-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 215, 0, 0.1),
+                transparent
+            );
+            animation: shine 3s infinite linear;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .announcement-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .announcement-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .announcement-title i {
+            color: #ffd700;
+            font-size: 26px;
+        }
+
+        .announcement-content {
+            font-size: 16px;
+            line-height: 1.8;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            min-height: 180px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .announcement-date {
+            text-align: right;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .announcement-date i {
+            margin-right: 8px;
+            color: #ffd700;
+        }
+
+        /* ==================== PRODUCTS SECTION ==================== */
+        .section-title {
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 800;
+        }
+
+        .section-title i {
+            font-size: 28px;
+            color: #000;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 70px;
+        }
+
+        .product {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product:hover {
+            transform: translateY(-10px);
+            border-color: #000;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .product::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #000, #333);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .product:hover::before {
+            opacity: 1;
+        }
+
+        .delete-product-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .delete-product-btn:hover {
+            background: #ff2222;
+            transform: scale(1.1);
+        }
+
+        .product:hover .delete-product-btn {
+            display: flex;
+        }
+
+        .product-icon {
+            font-size: 48px;
+            color: #000;
+            margin-bottom: 20px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-icon i {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #000;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            min-height: 40px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            color: #000;
+            font-weight: 800;
+            margin: 20px 0;
+            padding: 12px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .order-btn:hover {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ==================== PAYMENT SECTION ==================== */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 70px;
+        }
+
+        .payment-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 5px solid #000;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .payment-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: #000;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .payment-title i {
+            font-size: 22px;
+            color: #000;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            padding: 18px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .payment-details span {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .payment-note {
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .payment-name {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #000;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .qrcode {
+            width: 240px;
+            height: 240px;
+            margin: 25px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .qrcode:hover {
+            transform: scale(1.03);
+            border-color: #000;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .qrcode img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .qr-note {
+            text-align: center;
+            color: #666;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* ==================== FOOTER ==================== */
+        footer {
+            display: none;
+            text-align: center;
+            padding: 40px 25px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            margin-top: 70px;
+            background: #fafafa;
+        }
+
+        footer p {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .footer-login-info {
+            margin-top: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-login-info i {
+            color: #000;
+        }
+
+        #userEmail {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .logout-small-btn {
+            padding: 8px 16px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .logout-small-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        /* ==================== TELEGRAM FLOAT ==================== */
+        .telegram-float {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #0088cc 0%, #24A1DE 100%);
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0, 136, 204, 0.3);
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .telegram-float:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(0, 136, 204, 0.4);
+        }
+
+        .telegram-float:active {
+            transform: scale(0.95);
+        }
+
+        /* ==================== MODALS ==================== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            border: 2px solid #000;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            animation: modalSlideUp 0.4s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from { 
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 25px;
+            color: #000;
+            font-weight: 800;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 45px;
+            height: 45px;
+            background: #000;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-close:hover {
+            background: #333;
+            transform: rotate(90deg);
+        }
+
+        .qr-modal-image {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .qr-modal-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* ==================== EDIT MODAL ==================== */
+        .edit-modal, .edit-social-modal, .add-product-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-box, .edit-social-box, .add-product-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            border: 3px solid #000;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .edit-title, .edit-social-title, .add-product-title {
+            font-size: 26px;
+            margin-bottom: 30px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 800;
+        }
+
+        .edit-textarea {
+            width: 100%;
+            height: 250px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            font-size: 16px;
+            margin-bottom: 25px;
+            resize: vertical;
+            line-height: 1.6;
+            font-family: inherit;
+        }
+
+        .edit-textarea:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-social-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .edit-social-input:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .cancel-btn, .back-btn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn:hover, .back-btn:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ==================== ERROR MESSAGES ==================== */
+        .error-message {
+            color: #ff4444;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+            padding: 12px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        /* ==================== EXISTING PRODUCTS ==================== */
+        .existing-products {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .existing-products h4 {
+            margin-bottom: 15px;
+            color: #000;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #existingProductsList {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #existingProductsList ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #existingProductsList li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-size: 14px;
+        }
+
+        #existingProductsList li:last-child {
+            border-bottom: none;
+        }
+
+        /* ==================== PROFILE PAGE ==================== */
+        .profile-page, .social-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 4000;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .profile-header, .social-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .profile-header h2, .social-header h2 {
+            font-size: 28px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 800;
+        }
+
+        .close-profile-btn, .close-social-btn {
+            background: #000;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-profile-btn:hover, .close-social-btn:hover {
+            background: #333;
+            transform: rotate(90deg);
+        }
+
+        .profile-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            font-weight: 800;
+            color: #000;
+            min-width: 200px;
+            font-size: 16px;
+        }
+
+        .profile-value {
+            color: #333;
+            flex: 1;
+            text-align: right;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .change-password-section {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .change-password-section h3 {
+            margin-bottom: 25px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* ==================== SOCIAL MEDIA PAGE ==================== */
+        .social-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .social-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+            transition: all 0.4s;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .social-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+            border-color: #000;
+        }
+
+        .social-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        .social-description {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .social-url {
+            background: #f5f5f5;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 15px;
+            word-break: break-all;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .social-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 35px;
+            border-radius: 12px;
+            font-weight: 800;
+            transition: all 0.3s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+
+        .social-link:hover {
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .tiktok-icon { color: #000000; }
+        .whatsapp-icon { color: #25D366; }
+        .telegram-icon { color: #0088cc; }
+
+        /* ==================== USERS MODAL ==================== */
+        #usersList {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            padding-right: 10px;
+        }
+
+        .user-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #000;
+            transition: transform 0.3s;
+        }
+
+        .user-item:hover {
+            transform: translateX(5px);
+            background: #f1f3f5;
+        }
+
+        .user-item.developer {
+            border-left-color: #ffd700;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+        }
+
+        .user-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .user-item-name {
+            font-weight: 800;
+            color: #000;
+            font-size: 16px;
+        }
+
+        .user-item-email {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .user-item-meta {
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 110px 20px 50px;
+            }
+            
+            .announcement-box {
+                padding: 30px;
+            }
+            
+            .products {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-btn {
+                display: block;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .main-content {
+                padding: 100px 15px 40px;
+            }
+            
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .header p {
+                font-size: 16px;
+                margin-bottom: 30px;
+            }
+            
+            .profile {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .announcement-box {
+                padding: 25px;
+            }
+            
+            .announcement-content {
+                padding: 20px;
+                font-size: 15px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .products {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .qrcode {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .mobile-menu {
+                width: 300px;
+                padding: 20px;
+            }
+            
+            .user-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .telegram-float {
+                width: 55px;
+                height: 55px;
+                font-size: 26px;
+                bottom: 25px;
+                right: 25px;
+            }
+            
+            .edit-box, .edit-social-box, .add-product-box {
+                padding: 30px 20px;
+            }
+            
+            .profile-page, .social-page {
+                padding: 20px;
+            }
+            
+            .profile-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .profile-value {
+                text-align: left;
+                width: 100%;
+            }
+            
+            .social-card {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 90px 12px 30px;
+            }
+            
+            .header h1 {
+                font-size: 26px;
+            }
+            
+            .profile {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .announcement-box {
+                padding: 20px;
+            }
+            
+            .products {
+                grid-template-columns: 1fr;
+            }
+            
+            .product {
+                padding: 20px;
+            }
+            
+            .payment-card {
+                padding: 20px;
+            }
+            
+            .mobile-menu {
+                width: 280px;
+                padding: 15px;
+            }
+            
+            .login-box {
+                padding: 30px 20px;
+            }
+            
+            .telegram-float {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .edit-buttons {
+                flex-direction: column;
+            }
+            
+            .cancel-btn, .save-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .social-link {
+                padding: 14px 25px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .mobile-menu {
+                width: 260px;
+            }
+            
+            .product-icon {
+                font-size: 40px;
+                height: 70px;
+            }
+            
+            .product-name {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- LOGIN MODAL -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fas fa-store"></i>
+                <h1>WAHYU<span>SHOP</span></h1>
+            </div>
+            
+            <h2 class="login-title">Masuk ke WAHYU SHOP</h2>
+            <p class="login-subtitle">Silakan login dengan email Anda untuk mengakses website</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="contoh@email.com" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Masukkan password" required>
+                </div>
+                
+                <div class="login-error" id="loginError">
+                    Email atau password salah. Coba lagi.
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Masuk ke Website
+                </button>
+                
+                <p class="login-note">
+                    <i class="fas fa-info-circle"></i> Gunakan email dan password apa saja untuk mencoba
+                </p>
+            </form>
+        </div>
+    </div>
+    
+    <!-- EDIT SOCIAL MODAL -->
+    <div class="edit-social-modal" id="editSocialModal">
+        <div class="edit-social-box">
+            <h2 class="edit-social-title"><i class="fas fa-edit"></i> Edit Link Sosial Media</h2>
+            
+            <div class="input-group">
+                <label for="tiktokLink">TikTok Link</label>
+                <input type="text" id="tiktokLink" class="edit-social-input" placeholder="https://tiktok.com/@username">
+            </div>
+            
+            <div class="input-group">
+                <label for="whatsappLink">WhatsApp Link</label>
+                <input type="text" id="whatsappLink" class="edit-social-input" placeholder="https://wa.me/628123456789">
+            </div>
+            
+            <div class="input-group">
+                <label for="telegramLink">Telegram Link</label>
+                <input type="text" id="telegramLink" class="edit-social-input" placeholder="https://t.me/channelname">
+            </div>
+            
+            <div class="edit-buttons">
+                <button class="cancel-btn" onclick="closeEditSocialModal()">Batal</button>
+                <button class="save-btn" onclick="saveSocialLinks()"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ADD PRODUCT MODAL -->
+    <div class="add-product-modal" id="addProductModal">
+        <div class="add-product-box">
+            <h2 class="add-product-title"><i class="fas fa-plus-circle"></i> Tambah Produk Baru</h2>
+            
+            <div class="input-group">
+                <label for="productName">Nama Produk</label>
+                <input type="text" id="productName" class="edit-social-input" placeholder="Contoh: MURBUG, JASA WEBSITE, dll">
+            </div>
+            
+            <div class="input-group">
+                <label for="productPrice">Harga Produk</label>
+                <input type="text" id="productPrice" class="edit-social-input" placeholder="Contoh: Rp 5.000 atau Rp 10.000 - 20.000">
+            </div>
+            
+            <div class="input-group">
+                <label for="productIcon">Icon Produk</label>
+                <select id="productIcon" class="edit-social-input">
+                    <option value="fas fa-mobile-alt">📱 Mobile (fa-mobile-alt)</option>
+                    <option value="fas fa-sun">☀️ Sun (fa-sun)</option>
+                    <option value="fas fa-file-powerpoint">📊 PowerPoint (fa-file-powerpoint)</option>
+                    <option value="fas fa-code">💻 Code (fa-code)</option>
+                    <option value="fas fa-laptop-code">💻 Laptop Code (fa-laptop-code)</option>
+                    <option value="fas fa-robot">🤖 Robot (fa-robot)</option>
+                    <option value="fas fa-egg">🥚 Egg (fa-egg)</option>
+                    <option value="fas fa-desktop">🖥️ Desktop (fa-desktop)</option>
+                    <option value="fas fa-gamepad">🎮 Gamepad (fa-gamepad)</option>
+                    <option value="fas fa-headset">🎧 Headset (fa-headset)</option>
+                    <option value="fas fa-gift">🎁 Gift (fa-gift)</option>
+                    <option value="fas fa-coins">🪙 Coins (fa-coins)</option>
+                    <option value="fas fa-bolt">⚡ Bolt (fa-bolt)</option>
+                    <option value="fas fa-fire">🔥 Fire (fa-fire)</option>
+                    <option value="fas fa-star">⭐ Star (fa-star)</option>
+                    <option value="fas fa-crown">👑 Crown (fa-crown)</option>
+                    <option value="fas fa-shield-alt">🛡️ Shield (fa-shield-alt)</option>
+                    <option value="fas fa-rocket">🚀 Rocket (fa-rocket)</option>
+                    <option value="fas fa-gem">💎 Gem (fa-gem)</option>
+                    <option value="fas fa-ellipsis-h">⋯ More (fa-ellipsis-h)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="productDescription">Deskripsi Singkat (Opsional)</label>
+                <input type="text" id="productDescription" class="edit-social-input" placeholder="Deskripsi singkat produk">
+            </div>
+            
+            <div id="addProductError" class="error-message"></div>
+            
+            <div class="edit-buttons">
+                <button class="cancel-btn" onclick="closeAddProductModal()">Batal</button>
+                <button class="save-btn" onclick="addNewProduct()"><i class="fas fa-plus"></i> Tambah Produk</button>
+            </div>
+            
+            <div class="existing-products">
+                <h4><i class="fas fa-list"></i> Produk yang Sudah Ada:</h4>
+                <div id="existingProductsList">
+                    <!-- Daftar produk akan ditampilkan di sini -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- EDIT MODAL -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-box">
+            <h2 class="edit-title"><i class="fas fa-edit"></i> Edit Pengumuman</h2>
+            <textarea class="edit-textarea" id="announcementText" placeholder="Tulis pengumuman atau kuis di sini..."></textarea>
+            <div class="edit-buttons">
+                <button class="cancel-btn" onclick="closeEditModal()">Batal</button>
+                <button class="save-btn" onclick="saveAnnouncement()"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- USERS MODAL -->
+    <div class="modal" id="usersModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-users"></i> Daftar User Login</h3>
+            <div id="usersList">
+                <!-- Daftar user akan dimuat di sini -->
+            </div>
+            <button class="modal-close" onclick="closeUsersModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- PROFILE PAGE -->
+    <div class="profile-page" id="profilePage">
+        <div class="profile-header">
+            <h2><i class="fas fa-user-circle"></i> Profil User</h2>
+            <button class="close-profile-btn" onclick="closeProfilePage()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="profile-info">
+            <div class="profile-item">
+                <div class="profile-label">Email</div>
+                <div class="profile-value" id="profileEmail"></div>
+            </div>
+            <div class="profile-item">
+                <div class="profile-label">Username</div>
+                <div class="profile-value" id="profileUsername"></div>
+            </div>
+            <div class="profile-item">
+                <div class="profile-label">Status</div>
+                <div class="profile-value" id="profileStatus"></div>
+            </div>
+            <div class="profile-item">
+                <div class="profile-label">Tanggal Bergabung</div>
+                <div class="profile-value" id="profileJoinDate"></div>
+            </div>
+            <div class="profile-item">
+                <div class="profile-label">Login Terakhir</div>
+                <div class="profile-value" id="profileLastLogin"></div>
+            </div>
+        </div>
+        
+        <div class="change-password-section">
+            <h3><i class="fas fa-key"></i> Ubah Password</h3>
+            
+            <div class="input-group">
+                <label for="oldPassword">Password Lama</label>
+                <input type="password" id="oldPassword" placeholder="Masukkan password lama">
+            </div>
+            
+            <div class="input-group">
+                <label for="newPassword">Password Baru</label>
+                <input type="password" id="newPassword" placeholder="Masukkan password baru (min. 6 karakter)">
+            </div>
+            
+            <div class="input-group">
+                <label for="confirmPassword">Konfirmasi Password Baru</label>
+                <input type="password" id="confirmPassword" placeholder="Masukkan ulang password baru">
+            </div>
+            
+            <div id="passwordError" class="error-message"></div>
+            
+            <div class="action-buttons">
+                <button class="back-btn" onclick="closeProfilePage()">Kembali</button>
+                <button class="save-btn" onclick="changePassword()"><i class="fas fa-save"></i> Simpan Password Baru</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SOCIAL MEDIA PAGE -->
+    <div class="social-page" id="socialPage">
+        <div class="social-header">
+            <h2><i class="fas fa-share-alt"></i> Sosial Media Wahyushop</h2>
+            <button class="close-social-btn" onclick="closeSocialPage()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="social-container" id="socialContainer">
+            <!-- Konten sosial media akan di-generate oleh JavaScript -->
+        </div>
+    </div>
+    
+    <!-- NAVBAR -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="logo">
+            <i class="fas fa-store"></i>
+            <h1>WAHYU<span>SHOP</span></h1>
+        </div>
+        
+        <!-- DESKTOP NAV -->
+        <ul class="nav-links">
+            <li><a href="#home">Beranda</a></li>
+            <li><a href="#products">Produk</a></li>
+            <li><a href="#payment">E-wallet</a></li>
+            <li><a href="https://t.me/WahyuShop9" target="_blank">Telegram</a></li>
+            <li><a href="https://t.me/wahyuchannel0" target="_blank">Channel</a></li>
+        </ul>
+        
+        <!-- HAMBURGER BUTTON -->
+        <button class="menu-btn" id="menuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+    
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-header">
+            <h2>Menu</h2>
+            <button class="close-btn" id="closeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- USER PROFILE SECTION -->
+        <div class="user-profile-section" id="mobileUserProfile" onclick="openProfilePage()">
+            <div class="user-profile-header">
+                <div class="user-avatar" id="userAvatar">
+                    U
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="mobileUserName">
+                        Loading...
+                    </div>
+                    <div class="user-email" id="mobileUserEmail">
+                        user@example.com
+                    </div>
+                    <div class="developer-badge" id="developerBadge">
+                        <i class="fas fa-crown"></i> DEVELOPER
+                    </div>
+                </div>
+            </div>
+            <div class="profile-hint">
+                <i class="fas fa-user-circle"></i> Klik untuk lihat profil
+            </div>
+        </div>
+        
+        <ul class="mobile-links">
+            <li><a href="#home"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="#products"><i class="fas fa-shopping-cart"></i> Produk</a></li>
+            
+            <div class="menu-divider"></div>
+            
+            <li><a href="#payment"><i class="fas fa-wallet"></i> E-wallet</a></li>
+            <li><a href="#" onclick="showQr()"><i class="fas fa-qrcode"></i> QRIS</a></li>
+            
+            <div class="menu-divider"></div>
+            
+            <!-- SOSIAL MEDIA MENU -->
+            <li><a href="#" onclick="openSocialPage()" class="social-link-item">
+                <i class="fas fa-share-alt"></i> Sosial Media
+            </a></li>
+            
+            <div class="menu-divider"></div>
+            
+            <!-- MENU DEVELOPER -->
+            <div id="developerMenu">
+                <li><a href="#" onclick="openEditModal()" class="developer-item">
+                    <i class="fas fa-edit"></i> Edit Pengumuman
+                </a></li>
+                <li><a href="#" onclick="openAddProductModal()" class="developer-item">
+                    <i class="fas fa-plus-circle"></i> Tambah Produk
+                </a></li>
+                <li><a href="#" onclick="editSocialLinks()" class="developer-item">
+                    <i class="fas fa-share-alt"></i> Edit Sosmed
+                </a></li>
+                <li><a href="#" onclick="viewAllUsers()" class="developer-item">
+                    <i class="fas fa-users"></i> Lihat User
+                </a></li>
+                <div class="menu-divider"></div>
+            </div>
+            
+            <li><a href="https://t.me/WahyuShop9" target="_blank"><i class="fab fa-telegram"></i> Telegram</a></li>
+            <li><a href="https://t.me/wahyuchannel0" target="_blank"><i class="fas fa-broadcast-tower"></i> Channel</a></li>
+            
+            <div class="menu-divider"></div>
+            
+            <!-- LOGOUT BUTTON -->
+            <li>
+                <a href="#" onclick="mobileLogout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="mainContent">
+        <!-- HEADER -->
+        <header class="header" id="home">
+            <h1>WEBSITE WAHYUSHOP</h1>
+            <p>Daftar Produk & Layanan dengan Harga Terjangkau</p>
+            
+            <div class="profile">
+                <img src="https://files.catbox.moe/f41szo.jpg" 
+                     alt="Foto Profil Wahyushop">
+            </div>
+        </header>
+        
+        <!-- ANNOUNCEMENT BOX -->
+        <div class="announcement-box" id="announcementBox">
+            <div class="announcement-header">
+                <div class="announcement-title">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>PENGUMUMAN WAHYUSHOP</span>
+                </div>
+            </div>
+            <div class="announcement-content" id="announcementContent">
+                <!-- Konten pengumuman akan dimuat dari localStorage -->
+            </div>
+            <div class="announcement-date">
+                <i class="far fa-calendar"></i> 
+                <span id="announcementDate">Loading...</span>
+            </div>
+        </div>
+        
+        <!-- PRODUCTS -->
+        <section id="products">
+            <h2 class="section-title"><i class="fas fa-shopping-cart"></i> Daftar Produk</h2>
+            
+            <div class="products" id="productsContainer">
+                <!-- Produk akan dimuat dari localStorage -->
+            </div>
+        </section>
+        
+        <!-- PAYMENT -->
+        <section id="payment">
+            <h2 class="section-title"><i class="fas fa-wallet"></i> E-wallet</h2>
+            
+            <div class="payment-methods">
+                <!-- DANA -->
+                <div class="payment-card">
+                    <div class="payment-title">
+                        <i class="fas fa-wallet"></i> DANA
+                    </div>
+                    <div class="payment-details">
+                        <span id="dana">083152987363</span>
+                        <button class="copy-btn" onclick="copyDana()">
+                            <i class="far fa-copy"></i> Salin
+                        </button>
+                    </div>
+                    <p class="payment-note">
+                        <i class="fas fa-info-circle"></i> Transfer kapan saja
+                    </p>
+                </div>
+                
+                <!-- QRIS -->
+                <div class="payment-card">
+                    <div class="payment-title">
+                        <i class="fas fa-qrcode"></i> QRIS
+                    </div>
+                    <p class="payment-name">Ahmad Setio Wahyudi</p>
+                    <div class="qrcode" onclick="showQr()">
+                        <img src="https://files.catbox.moe/bjvotq.jpg" 
+                             alt="QR Code Wahyushop">
+                    </div>
+                    <p class="qr-note">
+                        <i class="fas fa-mouse-pointer"></i> Klik untuk memperbesar
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer id="mainFooter">
+        <p>&copy; 2023 Wahyushop | Telegram: @WahyuShop9 | Channel: @wahyuchannel0</p>
+        <p class="footer-login-info">
+            <i class="fas fa-user"></i> Login sebagai: <span id="userEmail"></span>
+            <button onclick="logout()" class="logout-small-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </p>
+    </footer>
+    
+    <!-- TELEGRAM FLOATING BUTTON -->
+    <a href="https://t.me/WahyuShop9" 
+       class="telegram-float" 
+       target="_blank"
+       title="Chat via Telegram"
+       id="telegramFloat">
+        <i class="fab fa-telegram"></i>
+    </a>
+    
+    <!-- QR MODAL -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <h3>QRIS - Ahmad Setio Wahyudi</h3>
+            <div class="qr-modal-image">
+                <img src="https://files.catbox.moe/bjvotq.jpg" 
+                     alt="QR Code Wahyushop">
+            </div>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== KONFIGURASI AWAL ====================
+        // AKUN DEVELOPER
+        const DEVELOPER_EMAIL = "admin@wahyushop.com";
+        const DEVELOPER_PASSWORD_HASH = "developer123";
+
+        // DEFAULT SOCIAL LINKS
+        const DEFAULT_SOCIAL_LINKS = {
+            tiktok: "https://www.tiktok.com/@wahyushopofficial",
+            whatsapp: "https://wa.me/6283152987363",
+            telegram: "https://t.me/wahyuchannel0"
+        };
+
+        // DEFAULT PRODUCTS
+        const DEFAULT_PRODUCTS = [
+            { id: 1, name: "MURBUG", price: "Rp 3.000 - 10.000", icon: "fas fa-mobile-alt", description: "Topup game murah" },
+            { id: 2, name: "MURSUN", price: "Rp 5.000", icon: "fas fa-sun", description: "Voucher game" },
+            { id: 3, name: "MURPP", price: "Rp 12.000", icon: "fas fa-file-powerpoint", description: "PowerPoint murah" },
+            { id: 4, name: "JASA WEBSITE PAYMENT", price: "Rp 25.000", icon: "fas fa-code", description: "Website payment gateway" },
+            { id: 5, name: "JASA WEBSITE PRODUK", price: "Rp 35.000", icon: "fas fa-laptop-code", description: "Website produk custom" },
+            { id: 6, name: "JASA PASANG BOT", price: "Rp 2.000", icon: "fas fa-robot", description: "Bot Telegram/WhatsApp" },
+            { id: 7, name: "JASA PASANG EGG", price: "Rp 6.000", icon: "fas fa-egg", description: "Egg drop bot" },
+            { id: 8, name: "ADMIN PANEL", price: "Rp 2.000", icon: "fas fa-desktop", description: "Panel admin website" },
+            { id: 9, name: "PRODUK LAINNYA", price: "Hubungi Admin", icon: "fas fa-ellipsis-h", description: "Tanya produk lainnya" }
+        ];
+
+        // DEFAULT ANNOUNCEMENT
+        const DEFAULT_ANNOUNCEMENT = `🎉 SELAMAT DATANG DI WAHYU SHOP! 🎉
+
+📢 **PROMO KHUSUS BULAN INI:**
+• Diskon 10% untuk pembelian pertama
+• Gratis Admin Panel dengan pembelian Jasa Website
+• Bonus saldo 5k untuk topup di atas 50k
+
+❓ **KUIS HARIAN:**
+Sebutkan 3 produk unggulan WAHYU SHOP!
+Jawaban yang benar akan mendapatkan voucher 5k!
+
+🏆 **PENGGUNA TERAKTIF:**
+- Bulan lalu: @wahyu_user123 (Rp 150k)
+- Minggu ini: @gamer_pro (Rp 75k)
+
+📞 **INFO KONTAK:**
+• Telegram: @WahyuShop9
+• Channel: @wahyuchannel0
+
+⚠️ **PERHATIAN:**
+Jangan memberikan password atau OTP kepada siapapun!`;
+
+        // ==================== ELEMENT REFERENCES ====================
+        // Login Elements
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+
+        // Main Elements
+        const mainNavbar = document.getElementById('mainNavbar');
+        const mainContent = document.getElementById('mainContent');
+        const mainFooter = document.getElementById('mainFooter');
+        const telegramFloat = document.getElementById('telegramFloat');
+        const userEmailSpan = document.getElementById('userEmail');
+
+        // Loading
+        const loading = document.getElementById('loading');
+
+        // Mobile Elements
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileUserProfile = document.getElementById('mobileUserProfile');
+        const mobileUserName = document.getElementById('mobileUserName');
+        const mobileUserEmail = document.getElementById('mobileUserEmail');
+        const userAvatar = document.getElementById('userAvatar');
+        const developerBadge = document.getElementById('developerBadge');
+        const developerMenu = document.getElementById('developerMenu');
+
+        // Profile Elements
+        const profilePage = document.getElementById('profilePage');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileUsername = document.getElementById('profileUsername');
+        const profileStatus = document.getElementById('profileStatus');
+        const profileJoinDate = document.getElementById('profileJoinDate');
+        const profileLastLogin = document.getElementById('profileLastLogin');
+
+        // Password Change Elements
+        const oldPasswordInput = document.getElementById('oldPassword');
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordError = document.getElementById('passwordError');
+
+        // Social Elements
+        const socialPage = document.getElementById('socialPage');
+        const socialContainer = document.getElementById('socialContainer');
+        const editSocialModal = document.getElementById('editSocialModal');
+        const tiktokLinkInput = document.getElementById('tiktokLink');
+        const whatsappLinkInput = document.getElementById('whatsappLink');
+        const telegramLinkInput = document.getElementById('telegramLink');
+
+        // Product Elements
+        const productsContainer = document.getElementById('productsContainer');
+        const addProductModal = document.getElementById('addProductModal');
+        const productNameInput = document.getElementById('productName');
+        const productPriceInput = document.getElementById('productPrice');
+        const productIconInput = document.getElementById('productIcon');
+        const productDescriptionInput = document.getElementById('productDescription');
+        const addProductError = document.getElementById('addProductError');
+        const existingProductsList = document.getElementById('existingProductsList');
+
+        // Announcement Elements
+        const announcementContent = document.getElementById('announcementContent');
+        const announcementDate = document.getElementById('announcementDate');
+        const editModal = document.getElementById('editModal');
+        const announcementText = document.getElementById('announcementText');
+
+        // Modal Elements
+        const usersModal = document.getElementById('usersModal');
+        const usersList = document.getElementById('usersList');
+        const qrModal = document.getElementById('qrModal');
+
+        // ==================== UTILITY FUNCTIONS ====================
+        // Show/hide loading
+        function showLoading() {
+            loading.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        // Get first letter of email for avatar
+        function getAvatarLetter(email) {
+            return email ? email.charAt(0).toUpperCase() : 'U';
+        }
+
+        // Get username from email
+        function getUsernameFromEmail(email) {
+            return email ? email.split('@')[0] : 'User';
+        }
+
+        // Format announcement text with line breaks
+        function formatAnnouncement(text) {
+            return text ? text.replace(/\n/g, '<br>') : '';
+        }
+
+        // Simple email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Show error message
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize database
+        function initDatabase() {
+            if (!localStorage.getItem('wahyushop_users')) {
+                localStorage.setItem('wahyushop_users', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('wahyushop_social_links')) {
+                localStorage.setItem('wahyushop_social_links', JSON.stringify(DEFAULT_SOCIAL_LINKS));
+            }
+            
+            if (!localStorage.getItem('wahyushop_products')) {
+                localStorage.setItem('wahyushop_products', JSON.stringify(DEFAULT_PRODUCTS));
+            }
+            
+            if (!localStorage.getItem('wahyushop_announcement')) {
+                localStorage.setItem('wahyushop_announcement', DEFAULT_ANNOUNCEMENT);
+                localStorage.setItem('wahyushop_announcement_date', new Date().toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }));
+            }
+        }
+
+        // Load announcement
+        function loadAnnouncement() {
+            const savedAnnouncement = localStorage.getItem('wahyushop_announcement');
+            const savedDate = localStorage.getItem('wahyushop_announcement_date');
+            
+            if (savedAnnouncement) {
+                announcementContent.innerHTML = formatAnnouncement(savedAnnouncement);
+                announcementDate.textContent = savedDate || "Tanggal tidak tersedia";
+                announcementText.value = savedAnnouncement;
+            } else {
+                announcementContent.innerHTML = formatAnnouncement(DEFAULT_ANNOUNCEMENT);
+                announcementDate.textContent = new Date().toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                announcementText.value = DEFAULT_ANNOUNCEMENT;
+            }
+        }
+
+        // Load products
+        function loadProducts() {
+            const products = JSON.parse(localStorage.getItem('wahyushop_products')) || DEFAULT_PRODUCTS;
+            const isDeveloper = localStorage.getItem('wahyushop_is_developer') === 'true';
+            
+            let html = '';
+            
+            products.forEach(product => {
+                html += `
+                    <div class="product" data-id="${product.id}">
+                        ${isDeveloper ? `<button class="delete-product-btn" onclick="deleteProduct(${product.id})"><i class="fas fa-times"></i></button>` : ''}
+                        <div class="product-icon"><i class="${product.icon}"></i></div>
+                        <div class="product-name">${product.name}</div>
+                        ${product.description ? `<div class="product-description">${product.description}</div>` : ''}
+                        <div class="product-price">${product.price}</div>
+                        <button class="order-btn" onclick="orderProduct('${product.name}')">
+                            <i class="fab fa-telegram"></i> Pesan via Telegram
+                        </button>
+                    </div>
+                `;
+            });
+            
+            productsContainer.innerHTML = html;
+            updateExistingProductsList();
+        }
+
+        // Update existing products list
+        function updateExistingProductsList() {
+            const products = JSON.parse(localStorage.getItem('wahyushop_products')) || DEFAULT_PRODUCTS;
+            
+            let html = '<ul>';
+            products.forEach((product, index) => {
+                html += `<li>${index + 1}. ${product.name} - ${product.price}</li>`;
+            });
+            html += '</ul>';
+            
+            existingProductsList.innerHTML = html;
+        }
+
+        // Load social media page
+        function loadSocialMediaPage() {
+            const socialLinks = JSON.parse(localStorage.getItem('wahyushop_social_links')) || DEFAULT_SOCIAL_LINKS;
+            
+            let html = '';
+            
+            html += `
+                <div class="social-card">
+                    <div class="social-icon tiktok-icon">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <h3 class="social-title">TikTok Official</h3>
+                    <p class="social-description">
+                        Follow TikTok kami untuk melihat video tutorial, promo, dan konten menarik lainnya!
+                    </p>
+                    <div class="social-url">
+                        ${socialLinks.tiktok}
+                    </div>
+                    <a href="${socialLinks.tiktok}" target="_blank" class="social-link">
+                        <i class="fab fa-tiktok"></i> Follow di TikTok
+                    </a>
+                </div>
+            `;
+            
+            html += `
+                <div class="social-card">
+                    <div class="social-icon whatsapp-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="social-title">Channel WhatsApp</h3>
+                    <p class="social-description">
+                        Join channel WhatsApp kami untuk info promo cepat, notifikasi stok, dan customer service!
+                    </p>
+                    <div class="social-url">
+                        ${socialLinks.whatsapp}
+                    </div>
+                    <a href="${socialLinks.whatsapp}" target="_blank" class="social-link">
+                        <i class="fab fa-whatsapp"></i> Join WhatsApp Channel
+                    </a>
+                </div>
+            `;
+            
+            html += `
+                <div class="social-card">
+                    <div class="social-icon telegram-icon">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <h3 class="social-title">Channel Telegram</h3>
+                    <p class="social-description">
+                        Subscribe channel Telegram untuk update produk baru, tutorial, dan komunitas pembeli!
+                    </p>
+                    <div class="social-url">
+                        ${socialLinks.telegram}
+                    </div>
+                    <a href="${socialLinks.telegram}" target="_blank" class="social-link">
+                        <i class="fab fa-telegram"></i> Subscribe Channel
+                    </a>
+                </div>
+            `;
+            
+            socialContainer.innerHTML = html;
+        }
+
+        // ==================== USER MANAGEMENT ====================
+        // Add/update user in database
+        function updateUserInDatabase(email, password, isDeveloper = false) {
+            const users = JSON.parse(localStorage.getItem('wahyushop_users'));
+            const now = new Date();
+            
+            const existingUserIndex = users.findIndex(user => user.email === email);
+            
+            if (existingUserIndex !== -1) {
+                // Update existing user
+                users[existingUserIndex].lastLogin = now.toISOString();
+                users[existingUserIndex].loginCount = (users[existingUserIndex].loginCount || 0) + 1;
+                if (isDeveloper) {
+                    users[existingUserIndex].isDeveloper = true;
+                }
+            } else {
+                // Add new user
+                users.push({
+                    email: email,
+                    username: getUsernameFromEmail(email),
+                    password: password,
+                    isDeveloper: isDeveloper,
+                    joinDate: now.toISOString(),
+                    lastLogin: now.toISOString(),
+                    loginCount: 1
+                });
+            }
+            
+            localStorage.setItem('wahyushop_users', JSON.stringify(users));
+            return users;
+        }
+
+        // Get user from database
+        function getUserFromDatabase(email) {
+            const users = JSON.parse(localStorage.getItem('wahyushop_users'));
+            return users.find(user => user.email === email);
+        }
+
+        // View all users (for developer)
+        function viewAllUsers() {
+            const users = JSON.parse(localStorage.getItem('wahyushop_users'));
+            
+            if (!users || users.length === 0) {
+                usersList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Belum ada user yang login.</p>';
+            } else {
+                let html = '';
+                users.forEach((user, index) => {
+                    const joinDate = new Date(user.joinDate).toLocaleDateString('id-ID');
+                    const lastLogin = new Date(user.lastLogin).toLocaleString('id-ID');
+                    const isDev = user.isDeveloper ? 'developer' : '';
+                    
+                    html += `
+                        <div class="user-item ${isDev}">
+                            <div class="user-item-header">
+                                <div class="user-item-name">
+                                    ${index + 1}. ${user.username} ${user.isDeveloper ? '👑' : ''}
+                                </div>
+                            </div>
+                            <div class="user-item-email">${user.email}</div>
+                            <div class="user-item-meta">
+                                <span>Bergabung: ${joinDate}</span>
+                                <span>Login: ${lastLogin}</span>
+                                <span>${user.loginCount}x login</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                usersList.innerHTML = html;
+            }
+            
+            usersModal.style.display = 'flex';
+            mobileMenu.classList.remove('active');
+        }
+
+        // Close users modal
+        function closeUsersModal() {
+            usersModal.style.display = 'none';
+        }
+
+        // ==================== LOGIN SYSTEM ====================
+        // Handle login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Basic validation
+            if (!validateEmail(email)) {
+                showError(loginError, 'Email tidak valid!');
+                return;
+            }
+            
+            if (password.length < 3) {
+                showError(loginError, 'Password minimal 3 karakter!');
+                return;
+            }
+            
+            showLoading();
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Check if developer account
+                const isDeveloper = email === DEVELOPER_EMAIL && password === DEVELOPER_PASSWORD_HASH;
+                
+                // Update user in database
+                updateUserInDatabase(email, password, isDeveloper);
+                
+                // Save to localStorage
+                localStorage.setItem('wahyushop_email', email);
+                localStorage.setItem('wahyushop_loggedin', 'true');
+                localStorage.setItem('wahyushop_is_developer', isDeveloper ? 'true' : 'false');
+                localStorage.setItem('wahyushop_last_login', new Date().toISOString());
+                
+                // Show website
+                loginSuccess(email, isDeveloper);
+                hideLoading();
+            }, 500);
+        });
+
+        // Successful login
+        function loginSuccess(email, isDeveloper) {
+            loginModal.style.display = 'none';
+            
+            // Show main content
+            mainNavbar.style.display = 'flex';
+            mainContent.style.display = 'block';
+            mainFooter.style.display = 'block';
+            telegramFloat.style.display = 'flex';
+            
+            // Update UI
+            updateUIAfterLogin(email, isDeveloper);
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Update UI after login
+        function updateUIAfterLogin(email, isDeveloper) {
+            const username = getUsernameFromEmail(email);
+            
+            // Update footer
+            if (isDeveloper) {
+                userEmailSpan.innerHTML = `<span style="color: #ffd700; font-weight: bold;">👑 ${username} (Developer)</span>`;
+            } else {
+                userEmailSpan.textContent = username;
+            }
+            
+            // Update mobile profile
+            updateMobileProfile(email, isDeveloper);
+            
+            // Load data
+            loadAnnouncement();
+            loadProducts();
+            loadSocialMediaPage();
+        }
+
+        // Update mobile profile
+        function updateMobileProfile(email, isDeveloper) {
+            mobileUserProfile.style.display = 'block';
+            mobileUserName.textContent = getUsernameFromEmail(email);
+            mobileUserEmail.textContent = email;
+            userAvatar.textContent = getAvatarLetter(email);
+            
+            if (isDeveloper) {
+                developerBadge.style.display = 'block';
+                developerMenu.style.display = 'block';
+            } else {
+                developerBadge.style.display = 'none';
+                developerMenu.style.display = 'none';
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                showLoading();
+                
+                setTimeout(() => {
+                    // Clear session
+                    localStorage.removeItem('wahyushop_email');
+                    localStorage.removeItem('wahyushop_loggedin');
+                    localStorage.removeItem('wahyushop_is_developer');
+                    
+                    // Hide website
+                    mainNavbar.style.display = 'none';
+                    mainContent.style.display = 'none';
+                    mainFooter.style.display = 'none';
+                    telegramFloat.style.display = 'none';
+                    mobileUserProfile.style.display = 'none';
+                    developerMenu.style.display = 'none';
+                    
+                    // Show login modal
+                    loginModal.style.display = 'flex';
+                    loginForm.reset();
+                    
+                    hideLoading();
+                }, 300);
+            }
+        }
+
+        // Mobile logout
+        function mobileLogout() {
+            logout();
+            mobileMenu.classList.remove('active');
+        }
+
+        // ==================== PROFILE MANAGEMENT ====================
+        // Open profile page
+        function openProfilePage() {
+            showLoading();
+            
+            setTimeout(() => {
+                const email = localStorage.getItem('wahyushop_email');
+                const isDeveloper = localStorage.getItem('wahyushop_is_developer') === 'true';
+                const userData = getUserFromDatabase(email);
+                
+                // Update profile info
+                profileEmail.textContent = email;
+                profileUsername.textContent = getUsernameFromEmail(email);
+                profileStatus.textContent = isDeveloper ? "Developer" : "User Biasa";
+                
+                if (userData) {
+                    profileJoinDate.textContent = new Date(userData.joinDate).toLocaleDateString('id-ID');
+                    profileLastLogin.textContent = new Date(userData.lastLogin).toLocaleString('id-ID');
+                } else {
+                    profileJoinDate.textContent = "Tidak tersedia";
+                    profileLastLogin.textContent = "Tidak tersedia";
+                }
+                
+                // Reset password fields
+                oldPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                passwordError.style.display = 'none';
+                
+                // Show profile page
+                profilePage.style.display = 'block';
+                mobileMenu.classList.remove('active');
+                
+                hideLoading();
+            }, 300);
+        }
+
+        // Close profile page
+        function closeProfilePage() {
+            profilePage.style.display = 'none';
+        }
+
+        // Change password
+        function changePassword() {
+            const oldPassword = oldPasswordInput.value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            // Validation
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                showError(passwordError, 'Semua field harus diisi!');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showError(passwordError, 'Password baru minimal 6 karakter!');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showError(passwordError, 'Password baru tidak cocok!');
+                return;
+            }
+            
+            showLoading();
+            
+            setTimeout(() => {
+                // Update in database
+                const email = localStorage.getItem('wahyushop_email');
+                const users = JSON.parse(localStorage.getItem('wahyushop_users'));
+                const userIndex = users.findIndex(user => user.email === email);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].password = newPassword;
+                    localStorage.setItem('wahyushop_users', JSON.stringify(users));
+                }
+                
+                // Show success
+                alert('Password berhasil diubah!');
+                
+                // Clear and close
+                oldPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                closeProfilePage();
+                
+                hideLoading();
+            }, 500);
+        }
+
+        // ==================== SOCIAL MEDIA MANAGEMENT ====================
+        // Open social page
+        function openSocialPage() {
+            showLoading();
+            
+            setTimeout(() => {
+                loadSocialMediaPage();
+                socialPage.style.display = 'block';
+                mobileMenu.classList.remove('active');
+                hideLoading();
+            }, 300);
+        }
+
+        // Close social page
+        function closeSocialPage() {
+            socialPage.style.display = 'none';
+        }
+
+        // Edit social links
+        function editSocialLinks() {
+            const socialLinks = JSON.parse(localStorage.getItem('wahyushop_social_links')) || DEFAULT_SOCIAL_LINKS;
+            
+            tiktokLinkInput.value = socialLinks.tiktok;
+            whatsappLinkInput.value = socialLinks.whatsapp;
+            telegramLinkInput.value = socialLinks.telegram;
+            
+            editSocialModal.style.display = 'flex';
+            mobileMenu.classList.remove('active');
+        }
+
+        function closeEditSocialModal() {
+            editSocialModal.style.display = 'none';
+        }
+
+        function saveSocialLinks() {
+            const newTiktokLink = tiktokLinkInput.value.trim();
+            const newWhatsappLink = whatsappLinkInput.value.trim();
+            const newTelegramLink = telegramLinkInput.value.trim();
+            
+            // Validation
+            if (!newTiktokLink || !newWhatsappLink || !newTelegramLink) {
+                alert('Semua link harus diisi!');
+                return;
+            }
+            
+            if (!newTiktokLink.startsWith('http') || !newWhatsappLink.startsWith('http') || !newTelegramLink.startsWith('http')) {
+                alert('Link harus dimulai dengan http:// atau https://');
+                return;
+            }
+            
+            // Save
+            const newSocialLinks = {
+                tiktok: newTiktokLink,
+                whatsapp: newWhatsappLink,
+                telegram: newTelegramLink
+            };
+            
+            localStorage.setItem('wahyushop_social_links', JSON.stringify(newSocialLinks));
+            
+            // Update display
+            loadSocialMediaPage();
+            closeEditSocialModal();
+            alert('Link sosial media berhasil diperbarui!');
+        }
+
+        // ==================== PRODUCT MANAGEMENT ====================
+        // Open add product modal
+        function openAddProductModal() {
+            productNameInput.value = '';
+            productPriceInput.value = '';
+            productIconInput.value = 'fas fa-mobile-alt';
+            productDescriptionInput.value = '';
+            addProductError.style.display = 'none';
+            
+            updateExistingProductsList();
+            addProductModal.style.display = 'flex';
+            mobileMenu.classList.remove('active');
+        }
+
+        function closeAddProductModal() {
+            addProductModal.style.display = 'none';
+        }
+
+        function addNewProduct() {
+            const name = productNameInput.value.trim();
+            const price = productPriceInput.value.trim();
+            const icon = productIconInput.value;
+            const description = productDescriptionInput.value.trim();
+            
+            if (!name || !price) {
+                showError(addProductError, 'Nama produk dan harga harus diisi!');
+                return;
+            }
+            
+            const products = JSON.parse(localStorage.getItem('wahyushop_products')) || DEFAULT_PRODUCTS;
+            
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                price: price,
+                icon: icon,
+                description: description || ''
+            };
+            
+            products.push(newProduct);
+            localStorage.setItem('wahyushop_products', JSON.stringify(products));
+            
+            loadProducts();
+            closeAddProductModal();
+            alert('Produk berhasil ditambahkan!');
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Yakin ingin menghapus produk ini?')) {
+                const products = JSON.parse(localStorage.getItem('wahyushop_products')) || DEFAULT_PRODUCTS;
+                const updatedProducts = products.filter(product => product.id !== productId);
+                
+                localStorage.setItem('wahyushop_products', JSON.stringify(updatedProducts));
+                loadProducts();
+                alert('Produk berhasil dihapus!');
+            }
+        }
+
+        // ==================== ANNOUNCEMENT MANAGEMENT ====================
+        // Open edit modal
+        function openEditModal() {
+            editModal.style.display = 'flex';
+            announcementText.focus();
+            mobileMenu.classList.remove('active');
+        }
+
+        function closeEditModal() {
+            editModal.style.display = 'none';
+        }
+
+        function saveAnnouncement() {
+            showLoading();
+            
+            setTimeout(() => {
+                const newText = announcementText.value;
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                localStorage.setItem('wahyushop_announcement', newText);
+                localStorage.setItem('wahyushop_announcement_date', formattedDate);
+                
+                announcementContent.innerHTML = formatAnnouncement(newText);
+                announcementDate.textContent = formattedDate;
+                
+                closeEditModal();
+                alert('Pengumuman berhasil diperbarui!');
+                
+                hideLoading();
+            }, 300);
+        }
+
+        // ==================== ORDER FUNCTION ====================
+        function orderProduct(productName) {
+            const message = `Halo Wahyushop, saya ingin membeli ${productName}`;
+            const url = `https://t.me/WahyuShop9?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // ==================== PAYMENT FUNCTIONS ====================
+        function copyDana() {
+            const dana = document.getElementById('dana').textContent;
+            navigator.clipboard.writeText(dana).then(() => {
+                alert('Nomor DANA berhasil disalin!');
+            });
+        }
+
+        function showQr() {
+            qrModal.style.display = 'flex';
+            mobileMenu.classList.remove('active');
+        }
+
+        function closeModal() {
+            qrModal.style.display = 'none';
+        }
+
+        // ==================== MOBILE MENU ====================
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+
+        // Close mobile menu when clicking outside
+        mobileMenu.addEventListener('click', (e) => {
+            if (e.target === mobileMenu) {
+                mobileMenu.classList.remove('active');
+            }
+        });
+
+        // ==================== EVENT LISTENERS ====================
+        // Close modals when clicking outside
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
+
+        usersModal.addEventListener('click', (e) => {
+            if (e.target === usersModal) closeUsersModal();
+        });
+
+        editSocialModal.addEventListener('click', (e) => {
+            if (e.target === editSocialModal) closeEditSocialModal();
+        });
+
+        addProductModal.addEventListener('click', (e) => {
+            if (e.target === addProductModal) closeAddProductModal();
+        });
+
+        qrModal.addEventListener('click', (e) => {
+            if (e.target === qrModal) closeModal();
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                        mobileMenu.classList.remove('active');
+                    }
+                }
+            });
+        });
+
+        // Escape key to close modals/menus
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                }
+                if (qrModal.style.display === 'flex') closeModal();
+                if (editModal.style.display === 'flex') closeEditModal();
+                if (profilePage.style.display === 'block') closeProfilePage();
+                if (socialPage.style.display === 'block') closeSocialPage();
+                if (usersModal.style.display === 'flex') closeUsersModal();
+                if (editSocialModal.style.display === 'flex') closeEditSocialModal();
+                if (addProductModal.style.display === 'flex') closeAddProductModal();
+            }
+        });
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize database
+            initDatabase();
+            
+            // Show login modal by default
+            loginModal.style.display = 'flex';
+            
+            // Load data
+            loadAnnouncement();
+            loadProducts();
+            loadSocialMediaPage();
+            
+            // Check if already logged in
+            const savedEmail = localStorage.getItem('wahyushop_email');
+            const isLoggedIn = localStorage.getItem('wahyushop_loggedin') === 'true';
+            
+            if (savedEmail && isLoggedIn) {
+                const isDeveloper = localStorage.getItem('wahyushop_is_developer') === 'true';
+                loginSuccess(savedEmail, isDeveloper);
+            }
+        });
+    </script>
+</body>
+</html>
